@@ -1,15 +1,3 @@
-eupath,TriTrypDB,BsaltansLakeKonstanz,62,bsal
-eupath,TrichDB,TvaginalisG32022,62,tvgg
-eupath,ToxoDB,SneuronaSN3,62,sneu
-eupath,PlasmoDB,Pfalciparum3D7,62,pfal
-eupath,PiroplasmaDB,BovataMiyake,62,bova
-eupath,MicrosporidiaDB,EaedisUSNM41457,62,eaed
-eupath,HostDB,BtaurusHereford,62,btau
-eupath,GiardiaDB,GintestinalisAssemblageAWB2019,62,gaat
-eupath,FungiDB,AastaciAPO3,62,aast
-eupath,CryptoDB,CparvumIowaII,62,cpar
-eupath,AmoebaDB,AcastellaniiNeff,62,acas
-eupath,VectorBase,AaegyptiLVP_AGWG,62,aaeg
 Uniprot,UP000008458,ahos
 Uniprot,UP000002207,acid
 Uniprot,UP000007819,apis
