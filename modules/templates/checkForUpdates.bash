@@ -2,4 +2,4 @@
 
 set -euo pipefail
 
-perl /usr/bin/checkForUpdate.pl --inputFile $inputFile --storageDir storage --outputFile needsUpdate.txt
+perl /usr/bin/checkForUpdate.pl --inputFile $inputFile --storageDir storage --outputFile needsUpdate.txt --ebiFtpUser $ebiFtpUser --ebiFtpPassword $ebiFtpPassword
