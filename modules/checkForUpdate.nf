@@ -1,23 +1,10 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-process splitInputFile {
-
-  input:
-    path inputFile
-    val downloadsPerSplit
-
-  output:
-    path 'smaller*'         
-
-  script:
-    template 'splitInputFile.bash'
-}
-
 process downloadAndCheck {
 
   input:
-    path inputFile
+    tuple val(method), val(id), val(buildAbbrev), val(project)
     val ebiFtpUser
     val ebiFtpPassword
 
@@ -30,12 +17,11 @@ process downloadAndCheck {
 
 workflow checkForUpdate {
   take:
-    inputFile
+    datasets
 
   main:
 
-    splitInputFileResults = splitInputFile(inputFile, params.downloadsPerSplit).collect().flatten()
-    downloadAndCheckResults = downloadAndCheck(splitInputFileResults, params.ebiFtpUser, params.ebiFtpPassword)
+    downloadAndCheckResults = downloadAndCheck(datasets, params.ebiFtpUser, params.ebiFtpPassword)
     downloadAndCheckResults.collectFile(name: 'needsUpdate.txt', storeDir: params.outputDir)
         
 }

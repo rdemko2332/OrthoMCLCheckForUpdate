@@ -4,61 +4,59 @@ use strict;
 use warnings;
 use Getopt::Long;
 
-my ($inputFile, $storageDir, $outputFile, $ebiFtpUser, $ebiFtpPassword);
+my ($method, $id, $buildAbbrev, $project, $storageDir, $outputFile, $ebiFtpUser, $ebiFtpPassword);
 
-&GetOptions("inputFile=s"=> \$inputFile,
+&GetOptions("method=s"=> \$method,
+	    "id=s"=> \$id,
+	    "buildAbbrev=s"=> \$buildAbbrev,
+	    "project=s"=> \$project,
             "storageDir=s"=> \$storageDir,
             "outputFile=s"=> \$outputFile,
             "ebiFtpUser=s"=> \$ebiFtpUser,
             "ebiFtpPassword=s"=> \$ebiFtpPassword);
 
-open(my $data, '<', $inputFile) || die "Could not open file $inputFile: $!";
 open(OUT,">$outputFile");
 
-while (my $line = <$data>) {
-    chomp $line;
-
-    if ($line =~  /^Uniprot/) { 
-        my ($downloadType,$proteomeId,$abbrev) = split(/\,/, $line);
-	`wget "https://rest.uniprot.org/uniprotkb/stream?compressed=true&format=fasta&query=proteome%3A${proteomeId}" --tries=5 --output-document ./$abbrev.fasta.gz`;
-
-        `gunzip $abbrev.fasta.gz`;
-	`grep ">" $abbrev.fasta > newHeaders.txt`;
-	`sort newHeaders.txt -o sortedHeaders.txt`;
+if ($method =~  /^Uniprot/) { 
+    `wget "https://rest.uniprot.org/uniprotkb/stream?compressed=true&format=fasta&query=proteome%3A${id}" --tries=5 --output-document ./$buildAbbrev.fasta.gz`;
+    `gunzip $buildAbbrev.fasta.gz`;
+    `grep ">" $buildAbbrev.fasta > newHeaders.txt`;
+    `sort newHeaders.txt -o sortedHeaders.txt`;
 	
-	if (-e "/storage/$abbrev.txt") {
-            my $needsUpdate = `diff /storage/$abbrev.txt ./sortedHeaders.txt -q`;
+    if (-e "/storage/$buildAbbrev.txt") {
+        my $needsUpdate = `diff /storage/$buildAbbrev.txt ./sortedHeaders.txt -q`;
 
-	    if (length($needsUpdate) != 0) {
-	        `cp sortedHeaders.txt /storage/$abbrev.txt`;
-	        print OUT "$abbrev\n";
-            }
+	if (length($needsUpdate) != 0) {
+	    `cp sortedHeaders.txt /storage/$buildAbbrev.txt`;
+	    print OUT "$buildAbbrev\n";
         }
 
-	else {
-	    `cp sortedHeaders.txt /storage/$abbrev.txt`;
-	    print OUT "$abbrev\n";
-        }
     }
-    elsif ($line =~  /^Ebi/) {
-        my ($downloadType,$organismName,$build,$project) = split(/\,/, $line);
-	`wget --ftp-user ${ebiFtpUser} --ftp-password ${ebiFtpPassword} -O ${organismName}.sql.gz ftp://ftp-private.ebi.ac.uk:/EBIout/${build}/coredb/${project}/${organismName}.sql.gz`;
 
-	if (-e "/storage/$organismName.sql.gz") {
-            my $needsUpdate = `diff /storage/$organismName.sql.gz ./$organismName.sql.gz -q`;
-
-	    if (length($needsUpdate) != 0) {
-	        `cp ${organismName}.sql.gz /storage/${organismName}.sql.gz`;
-	        print OUT "$organismName\n";
-            }
-        }
-
-	else {
-	    `cp ${organismName}.sql.gz /storage/${organismName}.sql.gz`;
-	    print OUT "$organismName\n";
-        }
-    }
     else {
-	die "Line needs to start with Uniprot or Ebi\n";
+        `cp sortedHeaders.txt /storage/$buildAbbrev.txt`;
+        print OUT "$buildAbbrev\n";
     }
+}
+
+elsif ($method =~  /^Ebi/) {
+    `wget --ftp-user ${ebiFtpUser} --ftp-password ${ebiFtpPassword} -O ${id}.sql.gz ftp://ftp-private.ebi.ac.uk:/EBIout/${buildAbbrev}/coredb/${project}/${id}.sql.gz`;
+
+    if (-e "/storage/$id.sql.gz") {
+        my $needsUpdate = `diff /storage/$id.sql.gz ./$id.sql.gz -q`;
+
+        if (length($needsUpdate) != 0) {
+            `cp ${id}.sql.gz /storage/${id}.sql.gz`;
+            print OUT "$id\n";
+        }
+    }
+
+    else {
+        `cp ${id}.sql.gz /storage/${id}.sql.gz`;
+        print OUT "$id\n";
+    }
+}
+
+else {
+    die "Line needs to start with Uniprot or Ebi\n";
 }
